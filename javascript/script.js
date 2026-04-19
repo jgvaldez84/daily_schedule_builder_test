@@ -153,6 +153,7 @@ function openAddModal() {
   document.getElementById('addModalSubtitle').textContent = `Editing: ${fmtDateDisplay(currentDate())}`;
   populateTimeSelects();
   renderNameRoster();
+  renderDateCheckboxes();
   document.getElementById('addModalOverlay').classList.add('open');
 }
 
@@ -165,6 +166,7 @@ function openAddModalAt(time, col) {
   const colSel = document.getElementById('colSelect');
   colSel.value = col;
   renderNameRoster();
+  renderDateCheckboxes();
   document.getElementById('addModalOverlay').classList.add('open');
 }
 
@@ -211,6 +213,35 @@ function renderNameRoster() {
   });
 }
 
+function renderDateCheckboxes() {
+  const list = document.getElementById('dateCheckboxList');
+  list.innerHTML = '';
+  const currentDk = dateKey(currentDate());
+  ALL_DATES.forEach(d => {
+    const dk = dateKey(d);
+    const label = document.createElement('label');
+    label.style.cssText = 'display:flex;align-items:center;gap:4px;font-size:11px;font-weight:600;cursor:pointer;white-space:nowrap;';
+    const cb = document.createElement('input');
+    cb.type = 'checkbox';
+    cb.value = dk;
+    cb.checked = dk === currentDk;
+    label.appendChild(cb);
+    label.appendChild(document.createTextNode(d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })));
+    list.appendChild(label);
+  });
+}
+
+function selectAllDates() {
+  document.querySelectorAll('#dateCheckboxList input[type=checkbox]')
+    .forEach(cb => cb.checked = true);
+}
+
+function selectNoDatesBut() {
+  const dk = dateKey(currentDate());
+  document.querySelectorAll('#dateCheckboxList input[type=checkbox]')
+    .forEach(cb => cb.checked = cb.value === dk);
+}
+
 function applyAdd() {
   if (selectedNames.length === 0) { showToast('Select at least one name.'); return; }
   const col = document.getElementById('colSelect').value;
@@ -220,17 +251,24 @@ function applyAdd() {
   const toIdx = ALL_TIMES.indexOf(to);
   if (fromIdx === -1 || toIdx <= fromIdx) { showToast('Invalid time range.'); return; }
 
-  const dk = dateKey(currentDate());
-  for (let i = fromIdx; i < toIdx; i++) {
-    const t = ALL_TIMES[i];
-    const existing = getCell(dk, t, col);
-    const merged = [...new Set([...existing, ...selectedNames])];
-    setCell(dk, t, col, merged);
-  }
+  const checkedDates = [...document.querySelectorAll('#dateCheckboxList input[type=checkbox]:checked')]
+    .map(cb => cb.value);
+
+  if (checkedDates.length === 0) { showToast('Select at least one date.'); return; }
+
+  checkedDates.forEach(dk => {
+    for (let i = fromIdx; i < toIdx; i++) {
+      const t = ALL_TIMES[i];
+      const existing = getCell(dk, t, col);
+      const merged = [...new Set([...existing, ...selectedNames])];
+      setCell(dk, t, col, merged);
+    }
+  });
+
   saveState();
   renderTable();
   closeModal('addModalOverlay');
-  showToast(`Added ${selectedNames.join(', ')} to ${col}`);
+  showToast(`Added ${selectedNames.join(', ')} to ${col} on ${checkedDates.length} day(s)`);
 }
 
 function openManageModal() {

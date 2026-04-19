@@ -80,7 +80,16 @@
           <select id="timeTo"></select>
         </div>
       </div>
-
+      <label>Apply to Dates</label>
+      <div style="margin-bottom:4px;">
+        <button type="button" class="btn-secondary" onclick="selectAllDates()"
+          style="font-size:11px;padding:3px 10px;margin-right:6px;">Select All</button>
+        <button type="button" class="btn-secondary" onclick="selectNoDatesBut()"
+          style="font-size:11px;padding:3px 10px;">Current Day Only</button>
+      </div>
+      <div id="dateCheckboxList"
+        style="max-height:140px;overflow-y:auto;border:1px solid var(--border);border-radius:4px;padding:8px;background:#fafafa;display:flex;flex-wrap:wrap;gap:6px;">
+      </div>
       <p class="info-text">Names will be added to every half-hour slot from "From" up to (but not including) "To".</p>
 
       <div class="modal-actions">
