@@ -259,6 +259,17 @@ function applyAdd() {
   checkedDates.forEach(dk => {
     for (let i = fromIdx; i < toIdx; i++) {
       const t = ALL_TIMES[i];
+
+      // Remove these names from every other column at this time slot first
+      COLUMNS.forEach(otherCol => {
+        if (otherCol !== col) {
+          const existing = getCell(dk, t, otherCol);
+          const cleaned = existing.filter(n => !selectedNames.includes(n));
+          setCell(dk, t, otherCol, cleaned);
+        }
+      });
+
+      // Now add them to the target column
       const existing = getCell(dk, t, col);
       const merged = [...new Set([...existing, ...selectedNames])];
       setCell(dk, t, col, merged);
