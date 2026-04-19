@@ -1,4 +1,4 @@
-const COLUMNS = ['HDQA','Phones','Chat/Email', 'Lunch Break','Onsite FTE','Onsite SD','Remote FTE','Embedded FTE'];
+const COLUMNS = ['HDQA','Phones','Chat/Email','Lunch Break','Onsite FTE','Onsite SD','Remote FTE','Embedded FTE'];
 
 function generateDates() {
   const dates = [];
@@ -259,8 +259,6 @@ function applyAdd() {
   checkedDates.forEach(dk => {
     for (let i = fromIdx; i < toIdx; i++) {
       const t = ALL_TIMES[i];
-
-      // Remove these names from every other column at this time slot first
       COLUMNS.forEach(otherCol => {
         if (otherCol !== col) {
           const existing = getCell(dk, t, otherCol);
@@ -268,8 +266,6 @@ function applyAdd() {
           setCell(dk, t, otherCol, cleaned);
         }
       });
-
-      // Now add them to the target column
       const existing = getCell(dk, t, col);
       const merged = [...new Set([...existing, ...selectedNames])];
       setCell(dk, t, col, merged);
@@ -281,7 +277,6 @@ function applyAdd() {
   closeModal('addModalOverlay');
   showToast(`Added ${selectedNames.join(', ')} to ${col} on ${checkedDates.length} day(s)`);
 }
-
 function openManageModal() {
   renderAllNamesList();
   document.getElementById('newNameInput').value = '';
