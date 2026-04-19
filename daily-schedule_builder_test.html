@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Daily Schedule</title>
+<link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+<header>
+  <h1>Daily Schedule</h1>
+  <div style="display:flex;gap:8px">
+    <button class="btn-primary" onclick="openAddModal()">+ Add Names</button>
+    <button class="btn-secondary" onclick="openManageModal()" style="background:rgba(255,255,255,0.15);color:#fff;border-color:rgba(255,255,255,0.3)">Manage Names</button>
+  </div>
+</header>
+
+<div class="nav-bar">
+  <button class="nav-btn" onclick="prevDay()">&#8592; Prev</button>
+  <div class="date-display" id="dateDisplay"></div>
+  <button class="nav-btn" onclick="nextDay()">Next &#8594;</button>
+</div>
+
+<div class="table-wrap">
+  <table id="scheduleTable">
+    <thead>
+      <tr>
+        <th>Time</th>
+        <th>HDQA</th>
+        <th>Phones</th>
+        <th>Chat / Email</th>
+        <th>Onsite FTE</th>
+        <th>Onsite SD</th>
+        <th>Remote FTE</th>
+        <th>Embedded FTE</th>
+      </tr>
+    </thead>
+    <tbody id="scheduleBody"></tbody>
+  </table>
+</div>
+
+<div class="modal-overlay" id="addModalOverlay" onclick="handleOverlayClick(event, 'addModalOverlay')">
+  <div class="modal">
+    <h2>Add Name to Schedule</h2>
+    <div class="subtitle" id="addModalSubtitle"></div>
+
+    <label>Select Name(s)</label>
+    <div class="name-roster" id="nameRoster"></div>
+
+    <label>Column</label>
+    <select id="colSelect">
+      <option value="HDQA">HDQA</option>
+      <option value="Phones">Phones</option>
+      <option value="Chat/Email">Chat / Email</option>
+      <option value="Onsite FTE">Onsite FTE</option>
+      <option value="Onsite SD">Onsite SD</option>
+      <option value="Remote FTE">Remote FTE</option>
+      <option value="Embedded FTE">Embedded FTE</option>
+    </select>
+
+    <div class="time-range-row">
+      <div>
+        <label>From</label>
+        <select id="timeFrom"></select>
+      </div>
+      <div>
+        <label>To</label>
+        <select id="timeTo"></select>
+      </div>
+    </div>
+
+    <p class="info-text">Names will be added to every half-hour slot from "From" up to (but not including) "To".</p>
+
+    <div class="modal-actions">
+      <button class="btn-secondary" onclick="closeModal('addModalOverlay')">Cancel</button>
+      <button class="btn-primary" onclick="applyAdd()">Add to Schedule</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="manageModalOverlay" onclick="handleOverlayClick(event, 'manageModalOverlay')">
+  <div class="modal">
+    <h2>Manage Names</h2>
+    <div class="name-manager-section">
+      <h3>Add New Name</h3>
+      <div class="add-name-row">
+        <input type="text" id="newNameInput" placeholder="e.g. JOSE" maxlength="8" oninput="this.value=this.value.toUpperCase()">
+        <button class="btn-primary" onclick="addNewName()">Add</button>
+      </div>
+      <h3>All Names</h3>
+      <div class="all-names-list" id="allNamesList"></div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-secondary" onclick="closeModal('manageModalOverlay')">Close</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="javascript/script.js"></script>
+</body>
+</html>
