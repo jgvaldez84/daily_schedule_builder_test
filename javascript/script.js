@@ -293,5 +293,40 @@ document.addEventListener('keydown', e => {
   if (e.key === 'ArrowRight' && !document.querySelector('.modal-overlay.open')) nextDay();
 });
 
+function exportData() {
+  const data = JSON.stringify(state, null, 2);
+  const blob = new Blob([data], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'schedule-backup.json';
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+function triggerImport() {
+  document.getElementById('importFile').click();
+}
+
+function importData(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    try {
+      const parsed = JSON.parse(e.target.result);
+      state.names = parsed.names || state.names;
+      state.schedule = parsed.schedule || state.schedule;
+      state.currentIndex = parsed.currentIndex || 0;
+      saveState();
+      renderTable();
+      showToast('Schedule imported successfully!');
+    } catch(err) {
+      showToast('Error reading file — make sure it\'s a valid export.');
+    }
+  };
+  reader.readAsText(file);
+}
+
 loadState();
 renderTable();
