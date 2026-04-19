@@ -1,4 +1,4 @@
-const COLUMNS = ['HDQA','Phones','Chat/Email','Onsite FTE','Onsite SD','Remote FTE','Embedded FTE'];
+const COLUMNS = ['HDQA','Phones','Chat/Email', 'Lunch Break','Onsite FTE','Onsite SD','Remote FTE','Embedded FTE'];
 
 function generateDates() {
   const dates = [];
