@@ -129,8 +129,20 @@
   </div>
 
   <div class="toast" id="toast"></div>
-
+<div class="modal-overlay" id="dupModalOverlay" onclick="handleOverlayClick(event, 'dupModalOverlay')">
+  <div class="modal">
+    <h2>Duplicate Week</h2>
+    <div class="subtitle" id="dupWeekSubtitle"></div>
+    <label>Select Name to Duplicate</label>
+    <div class="name-roster" id="dupNamePicker"></div>
+    <div class="modal-actions">
+      <button class="btn-secondary" onclick="closeModal('dupModalOverlay')">Cancel</button>
+      <button class="btn-primary" onclick="applyDuplicateWeek()">Duplicate</button>
+    </div>
+  </div>
+</div>
   <script src="javascript/script.js"></script>
+
 </body>
 
 </html>

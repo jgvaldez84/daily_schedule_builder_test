@@ -322,6 +322,53 @@ function duplicateWeek() {
   const today = currentDate();
   const sourceSunday = getWeekSunday(today);
 
+  const targetSunday = new Date(sourceSunday);
+  targetSunday.setDate(targetSunday.getDate() + 7);
+
+  const lastAllowedDate = ALL_DATES[ALL_DATES.length - 1];
+  if (targetSunday > lastAllowedDate) {
+    showToast('No next week available within the schedule range.');
+    return;
+  }
+
+  const sourceFmt = sourceSunday.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+  const targetFmt = targetSunday.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+
+  document.getElementById('dupWeekSubtitle').textContent =
+    `Copying from week of ${sourceFmt} → week of ${targetFmt}`;
+
+  renderDupNamePicker();
+  document.getElementById('dupModalOverlay').classList.add('open');
+}
+
+function renderDupNamePicker() {
+  const picker = document.getElementById('dupNamePicker');
+  picker.innerHTML = '';
+  state.names.forEach(name => {
+    const chip = document.createElement('span');
+    chip.className = 'name-chip';
+    chip.textContent = name;
+    chip.dataset.selected = 'false';
+    chip.onclick = () => {
+      document.querySelectorAll('#dupNamePicker .name-chip').forEach(c => {
+        c.classList.remove('selected');
+        c.dataset.selected = 'false';
+      });
+      chip.classList.add('selected');
+      chip.dataset.selected = 'true';
+    };
+    picker.appendChild(chip);
+  });
+}
+
+function applyDuplicateWeek() {
+  const selected = document.querySelector('#dupNamePicker .name-chip[data-selected="true"]');
+  if (!selected) { showToast('Select a name first.'); return; }
+  const name = selected.textContent;
+
+  const today = currentDate();
+  const sourceSunday = getWeekSunday(today);
+
   const sourceDates = [];
   for (let i = 0; i < 7; i++) {
     const d = new Date(sourceSunday);
@@ -339,45 +386,53 @@ function duplicateWeek() {
     targetDates.push(d);
   }
 
-  const lastAllowedDate = ALL_DATES[ALL_DATES.length - 1];
-  if (targetSunday > lastAllowedDate) {
-    showToast('No next week available within the schedule range.');
-    return;
-  }
+  const targetFmt = targetSunday.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+  const sourceFmt = sourceSunday.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
 
   const targetHasData = targetDates.some(d => {
     const dk = dateKey(d);
     const dayData = state.schedule[dk];
     if (!dayData) return false;
     return Object.values(dayData).some(timeSlot =>
-      Object.values(timeSlot).some(names => Array.isArray(names) && names.length > 0)
+      Object.entries(timeSlot).some(([col, names]) =>
+        Array.isArray(names) && names.includes(name)
+      )
     );
   });
 
-  const sourceFmt = sourceSunday.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-  const targetFmt = targetSunday.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-
-  const msg = targetHasData
-    ? `The week of ${targetFmt} already has data. Duplicating will overwrite it. Continue?`
-    : `Duplicate the week of ${sourceFmt} to the week of ${targetFmt}?`;
-
-  if (!confirm(msg)) return;
+  if (targetHasData) {
+    if (!confirm(`${name} already has data in the week of ${targetFmt}. Overwrite it?`)) return;
+  }
 
   pushUndo();
 
   sourceDates.forEach((srcDate, i) => {
     const srcKey = dateKey(srcDate);
     const tgtKey = dateKey(targetDates[i]);
-    if (state.schedule[srcKey]) {
-      state.schedule[tgtKey] = JSON.parse(JSON.stringify(state.schedule[srcKey]));
-    } else {
-      delete state.schedule[tgtKey];
-    }
+    const srcDayData = state.schedule[srcKey];
+
+    ALL_TIMES.forEach(t => {
+      COLUMNS.forEach(col => {
+        const srcNames = srcDayData?.[t]?.[col] || [];
+        const hadName = srcNames.includes(name);
+
+        if (!state.schedule[tgtKey]) state.schedule[tgtKey] = {};
+        if (!state.schedule[tgtKey][t]) state.schedule[tgtKey][t] = {};
+        const tgtNames = state.schedule[tgtKey][t][col] || [];
+
+        if (hadName) {
+          state.schedule[tgtKey][t][col] = [...new Set([...tgtNames, name])];
+        } else {
+          state.schedule[tgtKey][t][col] = tgtNames.filter(n => n !== name);
+        }
+      });
+    });
   });
 
   saveState();
   renderTable();
-  showToast(`Week of ${sourceFmt} duplicated to ${targetFmt}`);
+  closeModal('dupModalOverlay');
+  showToast(`${name}'s week of ${sourceFmt} duplicated to ${targetFmt}`);
 }
 
 function openManageModal() {
