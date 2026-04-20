@@ -46,6 +46,36 @@ let state = {
   schedule: {}
 };
 
+const MAX_UNDO = 20;
+let undoHistory = [];
+
+function deepCloneSchedule() {
+  return JSON.parse(JSON.stringify(state.schedule));
+}
+
+function pushUndo() {
+  undoHistory.push(deepCloneSchedule());
+  if (undoHistory.length > MAX_UNDO) undoHistory.shift();
+  updateUndoBtn();
+}
+
+function undo() {
+  if (undoHistory.length === 0) return;
+  state.schedule = undoHistory.pop();
+  saveState();
+  renderTable();
+  updateUndoBtn();
+  showToast('Undo successful');
+}
+
+function updateUndoBtn() {
+  const btn = document.getElementById('undoBtn');
+  if (!btn) return;
+  btn.disabled = undoHistory.length === 0;
+  btn.style.opacity = undoHistory.length === 0 ? '0.4' : '1';
+  btn.style.cursor = undoHistory.length === 0 ? 'default' : 'pointer';
+}
+
 function loadState() {
   try {
     const saved = localStorage.getItem('daily_schedule_v2');
@@ -97,7 +127,7 @@ function renderTable() {
   const body = document.getElementById('scheduleBody');
   body.innerHTML = '';
 
-  ALL_TIMES.forEach((t, i) => {
+  ALL_TIMES.forEach((t) => {
     const tr = document.createElement('tr');
     tr.className = t.endsWith(':00') ? 'full-hour' : 'half-hour';
 
@@ -136,6 +166,7 @@ function renderTable() {
 }
 
 function removeName(dk, t, col, name) {
+  pushUndo();
   const arr = getCell(dk, t, col).filter(n => n !== name);
   setCell(dk, t, col, arr);
   saveState();
@@ -256,6 +287,8 @@ function applyAdd() {
 
   if (checkedDates.length === 0) { showToast('Select at least one date.'); return; }
 
+  pushUndo();
+
   checkedDates.forEach(dk => {
     for (let i = fromIdx; i < toIdx; i++) {
       const t = ALL_TIMES[i];
@@ -277,6 +310,76 @@ function applyAdd() {
   closeModal('addModalOverlay');
   showToast(`Added ${selectedNames.join(', ')} to ${col} on ${checkedDates.length} day(s)`);
 }
+
+function getWeekSunday(d) {
+  const copy = new Date(d);
+  copy.setHours(0, 0, 0, 0);
+  copy.setDate(copy.getDate() - copy.getDay());
+  return copy;
+}
+
+function duplicateWeek() {
+  const today = currentDate();
+  const sourceSunday = getWeekSunday(today);
+
+  const sourceDates = [];
+  for (let i = 0; i < 7; i++) {
+    const d = new Date(sourceSunday);
+    d.setDate(d.getDate() + i);
+    sourceDates.push(d);
+  }
+
+  const targetSunday = new Date(sourceSunday);
+  targetSunday.setDate(targetSunday.getDate() + 7);
+
+  const targetDates = [];
+  for (let i = 0; i < 7; i++) {
+    const d = new Date(targetSunday);
+    d.setDate(d.getDate() + i);
+    targetDates.push(d);
+  }
+
+  const lastAllowedDate = ALL_DATES[ALL_DATES.length - 1];
+  if (targetSunday > lastAllowedDate) {
+    showToast('No next week available within the schedule range.');
+    return;
+  }
+
+  const targetHasData = targetDates.some(d => {
+    const dk = dateKey(d);
+    const dayData = state.schedule[dk];
+    if (!dayData) return false;
+    return Object.values(dayData).some(timeSlot =>
+      Object.values(timeSlot).some(names => Array.isArray(names) && names.length > 0)
+    );
+  });
+
+  const sourceFmt = sourceSunday.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+  const targetFmt = targetSunday.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+
+  const msg = targetHasData
+    ? `The week of ${targetFmt} already has data. Duplicating will overwrite it. Continue?`
+    : `Duplicate the week of ${sourceFmt} to the week of ${targetFmt}?`;
+
+  if (!confirm(msg)) return;
+
+  pushUndo();
+
+  sourceDates.forEach((srcDate, i) => {
+    const srcKey = dateKey(srcDate);
+    const tgtKey = dateKey(targetDates[i]);
+    if (state.schedule[srcKey]) {
+      state.schedule[tgtKey] = JSON.parse(JSON.stringify(state.schedule[srcKey]));
+    } else {
+      delete state.schedule[tgtKey];
+    }
+  });
+
+  saveState();
+  renderTable();
+  showToast(`Week of ${sourceFmt} duplicated to ${targetFmt}`);
+}
+
 function openManageModal() {
   renderAllNamesList();
   document.getElementById('newNameInput').value = '';
@@ -335,6 +438,10 @@ document.addEventListener('keydown', e => {
   }
   if (e.key === 'ArrowLeft' && !document.querySelector('.modal-overlay.open')) prevDay();
   if (e.key === 'ArrowRight' && !document.querySelector('.modal-overlay.open')) nextDay();
+  if (e.ctrlKey && e.key === 'z' && !document.querySelector('.modal-overlay.open')) {
+    e.preventDefault();
+    undo();
+  }
 });
 
 function exportData() {
@@ -374,3 +481,4 @@ function importData(event) {
 
 loadState();
 renderTable();
+updateUndoBtn();

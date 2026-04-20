@@ -12,10 +12,16 @@
 
   <header>
     <h1>Daily Schedule</h1>
-    <div style="display:flex;gap:8px">
+    <div style="display:flex;gap:8px;align-items:center;">
       <button class="btn-primary" onclick="openAddModal()">+ Add Names</button>
       <button class="btn-secondary" onclick="openManageModal()"
         style="background:rgba(255,255,255,0.15);color:#fff;border-color:rgba(255,255,255,0.3)">Manage Names</button>
+      <button id="undoBtn" class="btn-secondary" onclick="undo()"
+        style="background:rgba(255,255,255,0.15);color:#fff;border-color:rgba(255,255,255,0.3);opacity:0.4;cursor:default;"
+        title="Undo last change (Ctrl+Z)">&#8630; Undo</button>
+      <button class="btn-secondary" onclick="duplicateWeek()"
+        style="background:rgba(255,255,255,0.15);color:#fff;border-color:rgba(255,255,255,0.3)"
+        title="Duplicate this week's schedule to the next week">&#10063; Duplicate Week</button>
       <button class="btn-secondary" onclick="exportData()"
         style="background:rgba(255,255,255,0.15);color:#fff;border-color:rgba(255,255,255,0.3)">Export</button>
       <button class="btn-secondary" onclick="triggerImport()"
@@ -82,6 +88,7 @@
           <select id="timeTo"></select>
         </div>
       </div>
+
       <label>Apply to Dates</label>
       <div style="margin-bottom:4px;">
         <button type="button" class="btn-secondary" onclick="selectAllDates()"
@@ -92,6 +99,7 @@
       <div id="dateCheckboxList"
         style="max-height:140px;overflow-y:auto;border:1px solid var(--border);border-radius:4px;padding:8px;background:#fafafa;display:flex;flex-wrap:wrap;gap:6px;">
       </div>
+
       <p class="info-text">Names will be added to every half-hour slot from "From" up to (but not including) "To".</p>
 
       <div class="modal-actions">

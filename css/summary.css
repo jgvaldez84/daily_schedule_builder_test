@@ -136,16 +136,6 @@
       font-size: 13px;
   }
 
-  .table-title {
-      background: var(--red);
-      color: #fff;
-      text-align: center;
-      font-size: 14px;
-      font-weight: 700;
-      padding: 8px;
-      letter-spacing: 0.5px;
-  }
-
   thead th {
       background: var(--red);
       color: #fff;
@@ -172,21 +162,6 @@
   thead th.total-col {
       min-width: 60px;
       background: #6b1111;
-  }
-
-  thead .week-header th {
-      background: #a82020;
-      font-size: 11px;
-      font-weight: 700;
-      letter-spacing: 0.5px;
-      padding: 5px 10px;
-      position: sticky;
-      top: 128px;
-      z-index: 9;
-  }
-
-  thead .week-header th.total-col {
-      background: #7a1818;
   }
 
   tbody tr {
