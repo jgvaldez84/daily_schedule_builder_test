@@ -33,10 +33,13 @@
     </div>
   </header>
 
+  <!-- nav bar -->
   <div class="nav-bar">
     <button class="nav-btn" onclick="prevDay()">&#8592; Prev</button>
     <div class="date-display" id="dateDisplay"></div>
     <button class="nav-btn" onclick="nextDay()">Next &#8594;</button>
+    <button class="nav-btn" onclick="openClearDayModal()" style="color:#8B1A1A;border-color:#8B1A1A;">&#10005; Clear
+      Day</button>
   </div>
 
   <div class="table-wrap">
@@ -129,20 +132,37 @@
   </div>
 
   <div class="toast" id="toast"></div>
-<div class="modal-overlay" id="dupModalOverlay" onclick="handleOverlayClick(event, 'dupModalOverlay')">
-  <div class="modal">
-    <h2>Duplicate Week</h2>
-    <div class="subtitle" id="dupWeekSubtitle"></div>
-    <label>Select Name to Duplicate</label>
-    <div class="name-roster" id="dupNamePicker"></div>
-    <div class="modal-actions">
-      <button class="btn-secondary" onclick="closeModal('dupModalOverlay')">Cancel</button>
-      <button class="btn-primary" onclick="applyDuplicateWeek()">Duplicate</button>
+  <div class="modal-overlay" id="dupModalOverlay" onclick="handleOverlayClick(event, 'dupModalOverlay')">
+    <div class="modal">
+      <h2>Duplicate Week</h2>
+      <div class="subtitle" id="dupWeekSubtitle"></div>
+      <label>Select Name to Duplicate</label>
+      <div class="name-roster" id="dupNamePicker"></div>
+      <div class="modal-actions">
+        <button class="btn-secondary" onclick="closeModal('dupModalOverlay')">Cancel</button>
+        <button class="btn-primary" onclick="applyDuplicateWeek()">Duplicate</button>
+      </div>
     </div>
   </div>
-</div>
   <script src="javascript/script.js"></script>
-
+  <!-- Clear Day Modal — add before </body> -->
+  <div class="modal-overlay" id="clearDayModalOverlay" onclick="handleOverlayClick(event, 'clearDayModalOverlay')">
+    <div class="modal">
+      <h2>Clear Day</h2>
+      <div class="subtitle" id="clearDaySubtitle"></div>
+      <label>What would you like to clear?</label>
+      <div style="display:flex;flex-direction:column;gap:8px;margin-top:8px;">
+        <button class="btn-primary" onclick="clearEntireDay()" style="justify-content:center;">Clear Everything</button>
+        <div style="text-align:center;font-size:12px;color:#888;margin:4px 0;">— or clear a single person —</div>
+        <div class="name-roster" id="clearNamePicker"></div>
+        <button class="btn-secondary" onclick="clearSingleName()" style="justify-content:center;margin-top:4px;">Clear
+          Selected Name</button>
+      </div>
+      <div class="modal-actions">
+        <button class="btn-secondary" onclick="closeModal('clearDayModalOverlay')">Cancel</button>
+      </div>
+    </div>
+  </div>
 </body>
 
 </html>

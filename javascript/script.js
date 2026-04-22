@@ -533,6 +533,66 @@ function importData(event) {
   };
   reader.readAsText(file);
 }
+function openClearDayModal() {
+  const d = currentDate();
+  document.getElementById('clearDaySubtitle').textContent = fmtDateDisplay(d);
+  renderClearNamePicker();
+  document.getElementById('clearDayModalOverlay').classList.add('open');
+}
+
+function renderClearNamePicker() {
+  const picker = document.getElementById('clearNamePicker');
+  picker.innerHTML = '';
+  state.names.forEach(name => {
+    const chip = document.createElement('span');
+    chip.className = 'name-chip';
+    chip.textContent = name;
+    chip.dataset.selected = 'false';
+    chip.onclick = () => {
+      document.querySelectorAll('#clearNamePicker .name-chip').forEach(c => {
+        c.classList.remove('selected');
+        c.dataset.selected = 'false';
+      });
+      chip.classList.add('selected');
+      chip.dataset.selected = 'true';
+    };
+    picker.appendChild(chip);
+  });
+}
+
+function clearEntireDay() {
+  const dk = dateKey(currentDate());
+  const fmt = fmtDateDisplay(currentDate());
+  if (!confirm(`Clear all schedule data for ${fmt}? This cannot be undone after saving.`)) return;
+  pushUndo();
+  delete state.schedule[dk];
+  saveState();
+  renderTable();
+  closeModal('clearDayModalOverlay');
+  showToast(`Cleared all schedule data for ${fmt}`);
+}
+
+function clearSingleName() {
+  const selected = document.querySelector('#clearNamePicker .name-chip[data-selected="true"]');
+  if (!selected) { showToast('Select a name first.'); return; }
+  const name = selected.textContent;
+  const dk = dateKey(currentDate());
+  const fmt = fmtDateDisplay(currentDate());
+  if (!confirm(`Remove ${name} from all slots on ${fmt}?`)) return;
+  pushUndo();
+  const dayData = state.schedule[dk];
+  if (dayData) {
+    Object.values(dayData).forEach(timeSlot => {
+      Object.keys(timeSlot).forEach(col => {
+        timeSlot[col] = timeSlot[col].filter(n => n !== name);
+      });
+    });
+  }
+  saveState();
+  renderTable();
+  closeModal('clearDayModalOverlay');
+  showToast(`Removed ${name} from all slots on ${fmt}`);
+}
 
 loadState();
 renderTable();
