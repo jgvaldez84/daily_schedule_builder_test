@@ -212,12 +212,12 @@ function populateTimeSelects(preset) {
     from.appendChild(o1);
     to.appendChild(o2);
   });
-  const endTimes = [...ALL_TIMES.slice(1), '23:00'];
-  to.innerHTML = '';
-  endTimes.forEach(t => {
-    const o = new Option(fmt12(t), t);
-    to.appendChild(o);
-  });
+const endTimes = [...ALL_TIMES.slice(1), '23:00'];
+to.innerHTML = '';
+endTimes.forEach(t => {
+  const o = new Option(fmt12(t), t);
+  to.appendChild(o);
+});
   if (preset) {
     from.value = preset;
     const nextIdx = ALL_TIMES.indexOf(preset) + 1;
@@ -279,8 +279,8 @@ function applyAdd() {
   const from = document.getElementById('timeFrom').value;
   const to = document.getElementById('timeTo').value;
   const fromIdx = ALL_TIMES.indexOf(from);
-  const toIdx = ALL_TIMES.indexOf(to);
-  if (fromIdx === -1 || toIdx <= fromIdx) { showToast('Invalid time range.'); return; }
+const toIdx = to === '23:00' ? ALL_TIMES.length : ALL_TIMES.indexOf(to);
+if (fromIdx === -1 || toIdx <= fromIdx) { showToast('Invalid time range.'); return; }
 
   const checkedDates = [...document.querySelectorAll('#dateCheckboxList input[type=checkbox]:checked')]
     .map(cb => cb.value);
