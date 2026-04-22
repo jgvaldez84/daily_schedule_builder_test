@@ -219,10 +219,10 @@ endTimes.forEach(t => {
   to.appendChild(o);
 });
   if (preset) {
-    from.value = preset;
-    const nextIdx = ALL_TIMES.indexOf(preset) + 1;
-    to.value = ALL_TIMES[nextIdx] || ALL_TIMES[ALL_TIMES.length - 1];
-  }
+  from.value = preset;
+  const nextIdx = ALL_TIMES.indexOf(preset) + 1;
+  to.value = nextIdx < ALL_TIMES.length ? ALL_TIMES[nextIdx] : '23:00';
+}
 }
 
 function renderNameRoster() {
